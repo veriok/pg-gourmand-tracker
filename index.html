@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gourmand's Ledger — Project Gorgon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0f0d0a;
+    --bg2:       #1a160f;
+    --bg3:       #221c13;
+    --border:    #3a2e1c;
+    --border2:   #5a4422;
+    --gold:      #c8922a;
+    --gold2:     #e8b84b;
+    --gold-dim:  #7a5515;
+    --amber:     #d4700a;
+    --text:      #d9c9a8;
+    --text-dim:  #8a7a5a;
+    --text-muted:#5a4e34;
+    --green:     #5a8a3a;
+    --green2:    #7ab055;
+    --red:       #8a3a2a;
+    --meal:      #b05020;
+    --snack:     #205888;
+    --instant:   #505820;
+    --radius:    4px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 16px;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(200,146,42,0.08) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.005) 40px, rgba(255,255,255,0.005) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.005) 40px, rgba(255,255,255,0.005) 41px);
+  }
+
+  /* ── HEADER ─────────────────────────────────── */
+  header {
+    border-bottom: 1px solid var(--border2);
+    padding: 18px 24px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    background: linear-gradient(to bottom, rgba(30,22,10,0.9), transparent);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold2);
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 20px rgba(200,146,42,0.4);
+    white-space: nowrap;
+  }
+  header h1 span {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+  }
+  .header-stats {
+    display: flex;
+    gap: 18px;
+    margin-left: auto;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .stat-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .stat-pill strong { color: var(--gold); }
+
+  /* ── TABS ────────────────────────────────────── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    background: var(--bg2);
+  }
+  .tab-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+  }
+  .tab-btn:hover { color: var(--text-dim); }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── PANELS ──────────────────────────────────── */
+  .panel { display: none; padding: 20px 24px; }
+  .panel.active { display: block; }
+
+  /* ── BROWSE PANEL ────────────────────────────── */
+  .browse-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+    flex: 1;
+    min-width: 180px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus { border-color: var(--gold-dim); }
+
+  .filter-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold2); }
+  .filter-btn.meal.active { background: rgba(176,80,32,0.3); border-color: var(--meal); color: #e8905a; }
+  .filter-btn.snack.active { background: rgba(32,88,136,0.3); border-color: var(--snack); color: #6ab8f0; }
+  .filter-btn.instant.active { background: rgba(80,88,32,0.3); border-color: var(--instant); color: #b8c85a; }
+
+  .range-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .range-input {
+    width: 70px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+  }
+  .range-input:focus { border-color: var(--gold-dim); }
+
+  .action-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .action-btn:hover { border-color: var(--border2); color: var(--text); }
+  .action-btn.danger:hover { border-color: var(--red); color: #e07060; }
+
+  /* ── FOOD GRID ───────────────────────────────── */
+  .food-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px;
+  }
+  .food-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .food-card:hover { border-color: var(--border2); background: var(--bg3); }
+  .food-card.eaten {
+    background: rgba(90,138,58,0.08);
+    border-color: rgba(90,138,58,0.4);
+  }
+  .food-card.eaten .food-name { color: var(--text-dim); text-decoration: line-through; opacity: 0.7; }
+
+  .food-check {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border2);
+    border-radius: 2px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .food-card.eaten .food-check {
+    background: var(--green);
+    border-color: var(--green2);
+  }
+  .food-check::after {
+    content: '✓';
+    font-size: 11px;
+    color: white;
+    display: none;
+    line-height: 1;
+  }
+  .food-card.eaten .food-check::after { display: block; }
+
+  .food-info { flex: 1; min-width: 0; }
+  .food-name {
+    font-size: 0.88rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+  .food-meta {
+    display: flex;
+    gap: 5px;
+    margin-top: 2px;
+    align-items: center;
+  }
+  .type-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    padding: 1px 5px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .type-Meal { background: rgba(176,80,32,0.25); color: #e8905a; border: 1px solid rgba(176,80,32,0.4); }
+  .type-Snack { background: rgba(32,88,136,0.25); color: #6ab8f0; border: 1px solid rgba(32,88,136,0.4); }
+  .type-Instant-Snack { background: rgba(80,88,32,0.25); color: #b8c85a; border: 1px solid rgba(80,88,32,0.4); }
+
+  .req-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .req-label span { color: var(--gold-dim); }
+
+  .no-results {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 40px;
+    grid-column: 1/-1;
+  }
+
+  /* ── IMPORT PANEL ────────────────────────────── */
+  .import-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .import-layout { grid-template-columns: 1fr; } }
+
+  .panel-section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  .panel-section p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  textarea {
+    width: 100%;
+    height: 260px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px;
+    border-radius: var(--radius);
+    font-family: 'Crimson Text', serif;
+    font-size: 0.9rem;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--gold-dim); }
+
+  .btn-primary {
+    background: var(--gold-dim);
+    border: 1px solid var(--gold);
+    color: var(--gold2);
+    padding: 9px 20px;
+    border-radius: var(--radius);
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-top: 10px;
+  }
+  .btn-primary:hover { background: rgba(122,85,21,0.8); }
+
+  .import-result {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    display: none;
+  }
+  .import-result.success { background: rgba(90,138,58,0.15); border: 1px solid rgba(90,138,58,0.4); color: var(--green2); }
+  .import-result.warning { background: rgba(200,146,42,0.1); border: 1px solid rgba(200,146,42,0.3); color: var(--gold2); }
+
+  /* ── MISSING PANEL ───────────────────────────── */
+  .missing-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .sort-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .sort-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold2); }
+  .sort-btn:hover:not(.active) { border-color: var(--border2); color: var(--text); }
+
+  .missing-output {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    min-height: 200px;
+    font-size: 0.88rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-family: 'Crimson Text', serif;
+    color: var(--text);
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+
+  .missing-food-line { display: flex; gap: 10px; }
+  .missing-food-line .gnum { color: var(--gold-dim); min-width: 28px; text-align: right; }
+  .missing-food-line .fname { color: var(--text); }
+  .missing-food-line .ftype { color: var(--text-muted); font-style: italic; font-size: 0.82rem; }
+
+  .copy-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── SCROLLBAR ───────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+  /* ── SECTION DIVIDERS ────────────────────────── */
+  .grid-section-header {
+    grid-column: 1/-1;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    padding: 10px 0 4px;
+    border-bottom: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .grid-section-header:first-child { margin-top: 0; }
+
+  .divider-sep { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer a { color: var(--gold-dim); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Gourmand's Ledger <span>— Project Gorgon</span></h1>
+  <div class="header-stats">
+    <div class="stat-pill">Eaten: <strong id="stat-eaten">0</strong></div>
+    <div class="stat-pill">Total: <strong id="stat-total">0</strong></div>
+    <div class="stat-pill">Missing: <strong id="stat-missing">0</strong></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="browse">Browse</button>
+  <button class="tab-btn" data-tab="import">Import</button>
+  <button class="tab-btn" data-tab="missing">Missing</button>
+</nav>
+
+<!-- ── BROWSE ─────────────────────────────────────── -->
+<div class="panel active" id="panel-browse">
+  <div class="browse-toolbar">
+    <input class="search-input" type="text" id="search" placeholder="Search food…" autocomplete="off">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn meal" data-filter="Meal">Meal</button>
+    <button class="filter-btn snack" data-filter="Snack">Snack</button>
+    <button class="filter-btn instant" data-filter="Instant-Snack">Instant</button>
+    <span class="range-label">Req ≤</span>
+    <input class="range-input" type="number" id="maxReq" placeholder="—" min="0" max="100">
+    <button class="filter-btn active" data-eaten="all">All</button>
+    <button class="filter-btn" data-eaten="uneaten">Uneaten</button>
+    <button class="filter-btn" data-eaten="eaten">Eaten</button>
+    <button class="action-btn danger" id="btn-clear-all">Clear All</button>
+  </div>
+  <div class="food-grid" id="food-grid"></div>
+</div>
+
+<!-- ── IMPORT ─────────────────────────────────────── -->
+<div class="panel" id="panel-import">
+  <div class="import-layout">
+    <div class="panel-section">
+      <h2>Paste Eaten Foods List</h2>
+      <p>Import from Gourmand list in-game via <em>Skills → Gourmand → Report</em>, by pasting the entries. One food name per line; partial matches should work.</p>
+      <textarea id="import-text" placeholder="Baked Potato&#10;Apple Juice&#10;Mild Cheddar Cheese&#10;…"></textarea>
+      <br>
+      <button class="btn-primary" id="btn-import">Import & Mark as Eaten</button>
+      <div class="import-result" id="import-result"></div>
+    </div>
+    <div class="panel-section">
+      <h2>Save / Load</h2>
+      <p>Your progress is automatically saved to your browser's local storage. You can also export or import a save file.</p>
+      <button class="btn-primary" id="btn-export-save" style="margin-top:0">Export Save File</button>
+      <hr class="divider-sep">
+      <p>Load a previously exported save file:</p>
+      <textarea id="import-save" placeholder="Paste save data here…" style="height:120px"></textarea>
+      <br>
+      <button class="btn-primary" id="btn-load-save">Load Save Data</button>
+      <div class="import-result" id="save-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MISSING ────────────────────────────────────── -->
+<div class="panel" id="panel-missing">
+  <div class="missing-toolbar">
+    <span style="color:var(--text-dim);font-size:0.9rem;font-style:italic">Sort by:</span>
+    <button class="sort-btn active" data-sort="level">Gourmand Req</button>
+    <button class="sort-btn" data-sort="name">Name A→Z</button>
+    <button class="sort-btn" data-sort="type">Food Type</button>
+    <div style="margin-left:auto; display:flex; gap:8px;">
+      <button class="filter-btn meal" id="miss-filter-meal" data-miss="Meal">Meal</button>
+      <button class="filter-btn snack" id="miss-filter-snack" data-miss="Snack">Snack</button>
+      <button class="filter-btn instant" id="miss-filter-instant" data-miss="Instant-Snack">Instant</button>
+    </div>
+  </div>
+  <div class="missing-output" id="missing-output"></div>
+  <div class="copy-row">
+    <button class="btn-primary" id="btn-copy">Copy to Clipboard</button>
+    <button class="btn-primary" id="btn-download">Download as .txt</button>
+    <span id="copy-confirm" style="align-self:center;font-size:0.85rem;color:var(--green2);display:none;">Copied!</span>
+  </div>
+</div>
+
+<footer>
+  <span>Data from <a href="https://wiki.projectgorgon.com/wiki/Gourmand" target="_blank">Project Gorgon Wiki</a>. Progress saved in your browser.</span>
+  <span id="last-saved"></span>
+</footer>
+
+<script>
+// ── FOOD DATA ─────────────────────────────────────────────────────────────────
+// Fields: name, type (Meal/Snack/Instant-Snack), foodLevel, req (Gourmand Requirement)
+const FOODS = [
+  // Gathered / Natural
+  {name:"Red Apple",type:"Meal",foodLevel:1,req:0},
+  {name:"Grapes",type:"Meal",foodLevel:2,req:0},
+  {name:"Orange",type:"Meal",foodLevel:3,req:0},
+  {name:"Guava",type:"Meal",foodLevel:4,req:0},
+  {name:"Banana",type:"Meal",foodLevel:5,req:0},
+  {name:"Lemon",type:"Meal",foodLevel:6,req:0},
+  {name:"Pear",type:"Meal",foodLevel:7,req:0},
+  {name:"Peach",type:"Meal",foodLevel:8,req:0},
+  {name:"Green Apple",type:"Meal",foodLevel:9,req:0},
+  {name:"Horse Apple",type:"Meal",foodLevel:1,req:3},
+  {name:"Mulberries",type:"Meal",foodLevel:30,req:15},
+  {name:"Walnuts",type:"Meal",foodLevel:30,req:15},
+  {name:"Almonds",type:"Meal",foodLevel:7,req:0},
+  {name:"Sprigganberries",type:"Snack",foodLevel:20,req:5},
+  {name:"Cantaloupe",type:"Snack",foodLevel:25,req:10},
+  {name:"Swamp Gourd",type:"Snack",foodLevel:15,req:0},
+  {name:"Tomato",type:"Snack",foodLevel:27,req:12},
+  {name:"Evu Fruit",type:"Snack",foodLevel:30,req:15},
+  {name:"Large Strawberry",type:"Instant-Snack",foodLevel:5,req:0},
+  {name:"Honey",type:"Instant-Snack",foodLevel:5,req:0},
+  {name:"Rattus Root",type:"Instant-Snack",foodLevel:10,req:0},
+  {name:"Fairy Honey",type:"Instant-Snack",foodLevel:50,req:35},
+  {name:"Raw Oyster",type:"Instant-Snack",foodLevel:20,req:40},
+  {name:"Cleaned Shrimp",type:"Instant-Snack",foodLevel:15,req:0},
+  {name:"Cactus Juice",type:"Instant-Snack",foodLevel:8,req:0},
+  {name:"Bottle of Sugar Water",type:"Instant-Snack",foodLevel:0,req:0},
+  {name:"Bottle of Milk",type:"Snack",foodLevel:0,req:0},
+  {name:"Bottle of Goat Milk",type:"Snack",foodLevel:2,req:0},
+  {name:"Fairy Puffs",type:"Meal",foodLevel:10,req:0},
+  {name:"Goblin Wheatbread",type:"Meal",foodLevel:20,req:5},
+  {name:"Hardtack",type:"Meal",foodLevel:1,req:0},
+  {name:"Snacking Bread",type:"Snack",foodLevel:15,req:0},
+  {name:"Juicy Ham",type:"Meal",foodLevel:25,req:10},
+  {name:"Goblin Stew",type:"Snack",foodLevel:20,req:5},
+  {name:"Lembas Brick",type:"Meal",foodLevel:22,req:7},
+  // NPC Rewards
+  {name:"Selaxi's Scorpion Stinger",type:"Snack",foodLevel:45,req:30},
+  {name:"Selaxi's Cactus Mixer",type:"Snack",foodLevel:45,req:30},
+  {name:"Gretchen's Millet Bar",type:"Meal",foodLevel:25,req:10},
+  {name:"Gretchen's Potato Rolls",type:"Meal",foodLevel:30,req:15},
+  {name:"Leafwater",type:"Snack",foodLevel:25,req:10},
+  {name:"Wolfsbane Muffin",type:"Meal",foodLevel:0,req:0},
+  // Mushroom Smoothies (Mycology)
+  {name:"Parasol Mushroom Smoothie",type:"Snack",foodLevel:0,req:0},
+  {name:"Mycena Mushroom Smoothie",type:"Snack",foodLevel:5,req:0},
+  {name:"Boletus Mushroom Smoothie",type:"Snack",foodLevel:10,req:0},
+  {name:"Field Mushroom Smoothie",type:"Snack",foodLevel:15,req:0},
+  {name:"Blusher Mushroom Smoothie",type:"Snack",foodLevel:20,req:5},
+  {name:"Milk Cap Mushroom Smoothie",type:"Snack",foodLevel:25,req:10},
+  {name:"Blood Mushroom Smoothie",type:"Snack",foodLevel:30,req:15},
+  {name:"Coral Mushroom Smoothie",type:"Snack",foodLevel:40,req:25},
+  {name:"Myconutmeg",type:"Snack",foodLevel:8,req:0},
+  // Cheeses (Cheesemaking)
+  {name:"Cave Cheese",type:"Meal",foodLevel:3,req:0},
+  {name:"Cottage Cheese",type:"Snack",foodLevel:4,req:0},
+  {name:"Cream Cheese",type:"Snack",foodLevel:5,req:0},
+  {name:"Prim Cheese",type:"Snack",foodLevel:6,req:0},
+  {name:"Laressa's Cheese",type:"Snack",foodLevel:9,req:0},
+  {name:"Urda Cheese",type:"Snack",foodLevel:10,req:0},
+  {name:"Neufchatel Cheese",type:"Snack",foodLevel:12,req:0},
+  {name:"Mild Cheddar Cheese",type:"Snack",foodLevel:14,req:0},
+  {name:"Ricotta Cheese",type:"Snack",foodLevel:16,req:1},
+  {name:"Munster Cheese",type:"Snack",foodLevel:17,req:2},
+  {name:"Cheshire Cheese",type:"Snack",foodLevel:18,req:3},
+  {name:"Gloucester Cheese",type:"Snack",foodLevel:19,req:4},
+  {name:"Brunost Cheese",type:"Snack",foodLevel:20,req:5},
+  {name:"Fairwing Cheese",type:"Snack",foodLevel:21,req:6},
+  {name:"Cantal Cheese",type:"Snack",foodLevel:22,req:7},
+  {name:"Slave's Cheese",type:"Snack",foodLevel:23,req:8},
+  {name:"Sharp Cheddar Cheese",type:"Snack",foodLevel:24,req:9},
+  {name:"Brocciu Cheese",type:"Snack",foodLevel:26,req:11},
+  {name:"Brie Cheese",type:"Meal",foodLevel:28,req:13},
+  {name:"Mogyar Cheese",type:"Meal",foodLevel:31,req:16},
+  {name:"Raclette Cheese",type:"Snack",foodLevel:30,req:15},
+  {name:"Havarti Cheese",type:"Snack",foodLevel:32,req:17},
+  {name:"Monterey Jack Cheese",type:"Snack",foodLevel:33,req:18},
+  {name:"Camembert Cheese",type:"Meal",foodLevel:34,req:19},
+  {name:"Parmesan Cheese",type:"Snack",foodLevel:36,req:21},
+  {name:"Mozzarella Cheese",type:"Snack",foodLevel:38,req:23},
+  {name:"Emmentaler Cheese",type:"Meal",foodLevel:40,req:25},
+  {name:"Pepper Jack Cheese",type:"Snack",foodLevel:42,req:27},
+  {name:"Limburger Cheese",type:"Meal",foodLevel:44,req:29},
+  {name:"Haerel Cheese",type:"Snack",foodLevel:46,req:31},
+  {name:"Danablu Cheese",type:"Meal",foodLevel:48,req:33},
+  {name:"Appenzeller Cheese",type:"Meal",foodLevel:50,req:35},
+  {name:"Gul Cheese",type:"Snack",foodLevel:51,req:36},
+  {name:"Edam Cheese",type:"Snack",foodLevel:52,req:37},
+  {name:"Roquefort Cheese",type:"Meal",foodLevel:54,req:39},
+  {name:"Ricotta Forte",type:"Snack",foodLevel:56,req:41},
+  {name:"Gorgonzola Cheese",type:"Meal",foodLevel:57,req:42},
+  {name:"Sirine Cheese",type:"Snack",foodLevel:58,req:43},
+  {name:"Grasgot Cheese",type:"Meal",foodLevel:60,req:45},
+  {name:"Provolone Cheese",type:"Snack",foodLevel:62,req:47},
+  {name:"Esgarion Cheese",type:"Meal",foodLevel:63,req:48},
+  {name:"Telemea Cheese",type:"Snack",foodLevel:64,req:49},
+  {name:"Cambozola Cheese",type:"Meal",foodLevel:66,req:51},
+  {name:"Scamorza Cheese",type:"Snack",foodLevel:68,req:53},
+  {name:"Mur Del Cheese",type:"Meal",foodLevel:69,req:54},
+  {name:"Halloumi Cheese",type:"Snack",foodLevel:70,req:55},
+  {name:"Feta Cheese",type:"Snack",foodLevel:72,req:57},
+  {name:"Gouda Cheese",type:"Snack",foodLevel:74,req:59},
+  {name:"Stilton Cheese",type:"Meal",foodLevel:76,req:61},
+  {name:"Blue-Whisker Cheese",type:"Meal",foodLevel:78,req:63},
+  {name:"Ratkin Blue Cheese",type:"Meal",foodLevel:20,req:5},
+  {name:"Ratkin Survival Cheese",type:"Snack",foodLevel:20,req:5},
+  {name:"Colby Cheese",type:"Snack",foodLevel:25,req:10},
+  {name:"Romsor Cheese",type:"Snack",foodLevel:28,req:13},
+  {name:"Whisperwind Cheese",type:"Snack",foodLevel:35,req:20},
+  {name:"Gul's Fancy Cheese",type:"Meal",foodLevel:55,req:40},
+  // Cooking — Potatoes & Vegetables
+  {name:"Baked Potato",type:"Meal",foodLevel:1,req:0},
+  {name:"Potato Wedges",type:"Meal",foodLevel:1,req:0},
+  {name:"Perfectly Baked Potato",type:"Meal",foodLevel:2,req:0},
+  {name:"Hash Browns",type:"Meal",foodLevel:5,req:0},
+  {name:"Buttered Baked Potato",type:"Meal",foodLevel:10,req:0},
+  {name:"Cheesy Baked Potato",type:"Meal",foodLevel:15,req:0},
+  {name:"Loaded Baked Potato",type:"Meal",foodLevel:30,req:15},
+  {name:"Onion Rings",type:"Meal",foodLevel:5,req:0},
+  {name:"Onion Blossom",type:"Meal",foodLevel:5,req:0},
+  {name:"Boiled Cabbage",type:"Meal",foodLevel:10,req:0},
+  {name:"Cabbage Soup",type:"Meal",foodLevel:15,req:0},
+  {name:"Baked Beets",type:"Meal",foodLevel:20,req:5},
+  {name:"Glazed Beets",type:"Meal",foodLevel:25,req:10},
+  {name:"Squash Soup",type:"Meal",foodLevel:30,req:15},
+  {name:"Stuffed Squash",type:"Meal",foodLevel:30,req:15},
+  {name:"Broccoli Florets",type:"Meal",foodLevel:40,req:25},
+  {name:"Maple Carrots",type:"Meal",foodLevel:50,req:35},
+  {name:"Stuffed Bell Pepper",type:"Meal",foodLevel:53,req:38},
+  {name:"Vegetable Masterpiece",type:"Meal",foodLevel:56,req:41},
+  {name:"Guava Beet Muffin",type:"Meal",foodLevel:35,req:20},
+  // Cooking — Eggs
+  {name:"Hard-Boiled Egg",type:"Meal",foodLevel:1,req:0},
+  {name:"Plain Porridge",type:"Meal",foodLevel:1,req:0},
+  {name:"Soft-Boiled Egg",type:"Meal",foodLevel:7,req:0},
+  {name:"Raw Egg Blend",type:"Snack",foodLevel:3,req:0},
+  {name:"Scrambled Egg",type:"Meal",foodLevel:14,req:0},
+  {name:"Poached Egg",type:"Meal",foodLevel:15,req:0},
+  {name:"Bacon Basket",type:"Meal",foodLevel:13,req:0},
+  {name:"Basic Ham Omelet",type:"Meal",foodLevel:25,req:10},
+  {name:"Bacon-Lover's Omelet",type:"Meal",foodLevel:35,req:20},
+  // Cooking — Meat
+  {name:"Honey Ham",type:"Meal",foodLevel:1,req:0},
+  {name:"Bacon",type:"Instant-Snack",foodLevel:0,req:0},
+  {name:"Venison Roast",type:"Meal",foodLevel:15,req:0},
+  {name:"Sausage",type:"Meal",foodLevel:15,req:0},
+  {name:"Venison Jerky",type:"Instant-Snack",foodLevel:10,req:0},
+  {name:"Venison Psi-Mantis Style",type:"Meal",foodLevel:5,req:0},
+  {name:"Venison Hash",type:"Meal",foodLevel:25,req:10},
+  {name:"Ur-Bacon",type:"Instant-Snack",foodLevel:30,req:15},
+  {name:"BBQ Ribs",type:"Meal",foodLevel:40,req:25},
+  {name:"Beets 'n Meats",type:"Meal",foodLevel:45,req:30},
+  {name:"Mountain Mutton",type:"Meal",foodLevel:51,req:36},
+  {name:"Pepper Venison",type:"Instant-Snack",foodLevel:59,req:44},
+  {name:"Mystery Jerky",type:"Snack",foodLevel:10,req:0},
+  {name:"Barbecue Rabbit Chops",type:"Meal",foodLevel:30,req:15},
+  {name:"Barbecued Mystery Meat",type:"Meal",foodLevel:20,req:5},
+  {name:"Snakemeat Wraps",type:"Meal",foodLevel:35,req:20},
+  {name:"Goblin Pasties",type:"Meal",foodLevel:25,req:10},
+  {name:"Pork Chops with Watercress",type:"Meal",foodLevel:40,req:25},
+  {name:"Maggoty Ham",type:"Meal",foodLevel:30,req:15},
+  {name:"Yeti Stick",type:"Snack",foodLevel:40,req:25},
+  {name:"Jerky Lembas Brick",type:"Meal",foodLevel:30,req:15},
+  // Cooking — Chicken
+  {name:"Bland Baked Chicken",type:"Meal",foodLevel:5,req:0},
+  {name:"Chicken Drumstick",type:"Instant-Snack",foodLevel:15,req:0},
+  {name:"Chicken Psi-Mantis Style",type:"Meal",foodLevel:20,req:5},
+  {name:"Grilled Chicken",type:"Meal",foodLevel:25,req:10},
+  {name:"Chicken and Broccoli",type:"Meal",foodLevel:30,req:15},
+  {name:"Lemon-Glazed Chicken",type:"Meal",foodLevel:40,req:25},
+  {name:"Chicken Casserole",type:"Meal",foodLevel:50,req:35},
+  {name:"Aromatic Chicken",type:"Meal",foodLevel:54,req:39},
+  {name:"Spicy Chicken",type:"Meal",foodLevel:58,req:43},
+  {name:"All-Flavor Chicken",type:"Meal",foodLevel:60,req:45},
+  {name:"Banana Barbecue Chicken",type:"Meal",foodLevel:45,req:30},
+  // Cooking — Fish & Seafood
+  {name:"Fried Clownfish",type:"Meal",foodLevel:1,req:0},
+  {name:"Boiled Crab",type:"Meal",foodLevel:1,req:0},
+  {name:"Fried Crab",type:"Snack",foodLevel:15,req:0},
+  {name:"Dried Clownfish",type:"Snack",foodLevel:5,req:0},
+  {name:"Dried Grapefish",type:"Snack",foodLevel:10,req:0},
+  {name:"Dried Perch",type:"Snack",foodLevel:15,req:0},
+  {name:"Dried Eel",type:"Snack",foodLevel:20,req:5},
+  {name:"Grapefish Steak",type:"Meal",foodLevel:10,req:0},
+  {name:"Breaded Perch with Onions",type:"Meal",foodLevel:20,req:5},
+  {name:"Orange Perch",type:"Meal",foodLevel:25,req:10},
+  {name:"Eel Stir-Fry",type:"Meal",foodLevel:30,req:15},
+  {name:"Crab Roll",type:"Meal",foodLevel:32,req:17},
+  {name:"Maple-Smoked Shark",type:"Meal",foodLevel:40,req:25},
+  {name:"Super Fishy Surprise",type:"Meal",foodLevel:35,req:20},
+  {name:"Bonus Fishy Surprise",type:"Meal",foodLevel:35,req:20},
+  {name:"Shark and Crab Kebabs",type:"Meal",foodLevel:50,req:35},
+  {name:"Shark Chew",type:"Instant-Snack",foodLevel:52,req:37},
+  {name:"Spicy Cavefish",type:"Meal",foodLevel:56,req:41},
+  {name:"Cavefish Sticks",type:"Instant-Snack",foodLevel:60,req:45},
+  {name:"Grilled Amberjack",type:"Meal",foodLevel:45,req:30},
+  {name:"Pickled Pike",type:"Snack",foodLevel:35,req:20},
+  // Cooking — Monster Meat
+  {name:"Basic Beetle Skewer",type:"Meal",foodLevel:15,req:0},
+  {name:"Fried Spider Leg",type:"Meal",foodLevel:35,req:20},
+  {name:"Mantis-Stuffed Mushroom",type:"Meal",foodLevel:35,req:20},
+  {name:"Shroom Feast",type:"Meal",foodLevel:55,req:40},
+  {name:"Black Soup",type:"Meal",foodLevel:25,req:10},
+  {name:"Beef and Broccoli",type:"Meal",foodLevel:45,req:30},
+  {name:"Chicken and Broccoli",type:"Meal",foodLevel:30,req:15},
+  {name:"Cat Stew Cup",type:"Meal",foodLevel:30,req:15},
+  {name:"Furpot",type:"Meal",foodLevel:50,req:35},
+  // Cooking — Bread & Baked
+  {name:"Flatbread",type:"Snack",foodLevel:5,req:0},
+  {name:"Banana Bread",type:"Meal",foodLevel:45,req:30},
+  {name:"Barley Bread",type:"Meal",foodLevel:20,req:5},
+  {name:"Banana-Almond Pancakes",type:"Meal",foodLevel:30,req:15},
+  {name:"Laura's Cheese Biscuits",type:"Snack",foodLevel:45,req:30},
+  {name:"Laura's Crab Biscuits",type:"Meal",foodLevel:15,req:0},
+  {name:"Laura's Cheesy Beets",type:"Meal",foodLevel:30,req:15},
+  {name:"Laura's Famous Tart",type:"Meal",foodLevel:40,req:25},
+  {name:"Wolfsbane Muffin",type:"Meal",foodLevel:0,req:0},
+  // Cooking — Pies
+  {name:"Basic Pumpkin Pie",type:"Meal",foodLevel:50,req:35},
+  {name:"Fancy Pumpkin Pie",type:"Meal",foodLevel:60,req:45},
+  {name:"Peasant's Pie",type:"Meal",foodLevel:20,req:5},
+  {name:"Cottage Pie",type:"Meal",foodLevel:35,req:20},
+  {name:"Shepherd's Pie",type:"Meal",foodLevel:45,req:30},
+  {name:"Lemon Meringue Pie",type:"Meal",foodLevel:50,req:35},
+  // Cooking — Mixed Dishes
+  {name:"Boring Fruit Cocktail",type:"Meal",foodLevel:10,req:0},
+  {name:"Fruit Cocktail",type:"Meal",foodLevel:20,req:5},
+  {name:"Weird Fruit Cocktail",type:"Meal",foodLevel:25,req:10},
+  {name:"Cheesy Veggie Delight",type:"Meal",foodLevel:45,req:30},
+  {name:"Pumpkin Soup",type:"Meal",foodLevel:35,req:20},
+  {name:"Guava Bowl",type:"Snack",foodLevel:35,req:20},
+  {name:"Basic Pepperpot",type:"Meal",foodLevel:57,req:42},
+  {name:"Swamp Salad",type:"Meal",foodLevel:25,req:10},
+  {name:"Gobbledygook",type:"Meal",foodLevel:30,req:15},
+  {name:"Mandible's Dandy Dinner",type:"Meal",foodLevel:50,req:35},
+  {name:"Rattus Root Stew",type:"Meal",foodLevel:20,req:5},
+  // Cooking — Drinks & Beverages
+  {name:"Apple Juice",type:"Snack",foodLevel:10,req:0},
+  {name:"Orange Juice",type:"Snack",foodLevel:20,req:5},
+  {name:"Lemonade",type:"Snack",foodLevel:40,req:25},
+  {name:"Hiral's Citrus Blend",type:"Snack",foodLevel:50,req:35},
+  {name:"Beginner's Buttermilk",type:"Snack",foodLevel:5,req:0},
+  {name:"Sun Vale Tea",type:"Snack",foodLevel:10,req:0},
+  {name:"Bitter-Mint Tea",type:"Snack",foodLevel:25,req:10},
+  {name:"Desert Tea",type:"Snack",foodLevel:51,req:36},
+  {name:"Pumpkin Spice Tea",type:"Snack",foodLevel:55,req:40},
+  {name:"Pumpkin Smoothie",type:"Snack",foodLevel:30,req:15},
+  {name:"Fried Banana",type:"Snack",foodLevel:30,req:15},
+  {name:"Fruity Mushy",type:"Snack",foodLevel:30,req:15},
+  {name:"Beachside Blend",type:"Snack",foodLevel:55,req:40},
+  {name:"Hydration Punch",type:"Snack",foodLevel:57,req:42},
+  {name:"Chuma's Agave Secret",type:"Snack",foodLevel:60,req:45},
+  {name:"Candied Lemon",type:"Meal",foodLevel:50,req:35},
+  {name:"Fried Banana",type:"Snack",foodLevel:30,req:15},
+  // Shaved Ice
+  {name:"Apple Shaved Ice",type:"Instant-Snack",foodLevel:15,req:0},
+  {name:"Banana Shaved Ice",type:"Instant-Snack",foodLevel:15,req:0},
+  {name:"Lemon Shaved Ice",type:"Instant-Snack",foodLevel:15,req:0},
+  {name:"Berry Lollipop",type:"Instant-Snack",foodLevel:10,req:0},
+  {name:"Green Apple Jelly Beans",type:"Instant-Snack",foodLevel:10,req:0},
+  // Seasonal / Event
+  {name:"Spoiled Rations",type:"Meal",foodLevel:5,req:0},
+  {name:"Alpha Beets",type:"Meal",foodLevel:35,req:20},
+];
+
+// Deduplicate by name (keep first occurrence)
+const seen = new Set();
+const FOOD_LIST = FOODS.filter(f => {
+  if (seen.has(f.name)) return false;
+  seen.add(f.name);
+  return true;
+}).sort((a, b) => a.name.localeCompare(b.name));
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let eaten = new Set();
+let browseFilter = 'all';   // type filter
+let browseEaten  = 'all';   // eaten filter
+let missingSort  = 'level';
+let missTypeFilter = new Set(['Meal','Snack','Instant-Snack']);
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('pg-gourmand-eaten');
+    if (raw) eaten = new Set(JSON.parse(raw));
+  } catch(e) {}
+}
+function saveState() {
+  try {
+    localStorage.setItem('pg-gourmand-eaten', JSON.stringify([...eaten]));
+    const ts = new Date().toLocaleTimeString();
+    document.getElementById('last-saved').textContent = `Saved ${ts}`;
+  } catch(e) {}
+}
+loadState();
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const total   = FOOD_LIST.length;
+  const e       = FOOD_LIST.filter(f => eaten.has(f.name)).length;
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-eaten').textContent   = e;
+  document.getElementById('stat-missing').textContent = total - e;
+}
+
+// ── BROWSE ────────────────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid   = document.getElementById('food-grid');
+  const query  = document.getElementById('search').value.toLowerCase().trim();
+  const maxReq = parseInt(document.getElementById('maxReq').value) || 999;
+
+  const filtered = FOOD_LIST.filter(f => {
+    if (browseFilter !== 'all' && f.type !== browseFilter) return false;
+    if (browseEaten === 'eaten'   && !eaten.has(f.name)) return false;
+    if (browseEaten === 'uneaten' &&  eaten.has(f.name)) return false;
+    if (f.req > maxReq) return false;
+    if (query && !f.name.toLowerCase().includes(query)) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="no-results">No foods match your filters.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(f => {
+    const isEaten = eaten.has(f.name);
+    return `<div class="food-card${isEaten?' eaten':''}" data-name="${escape(f.name)}">
+      <div class="food-check"></div>
+      <div class="food-info">
+        <div class="food-name">${f.name}</div>
+        <div class="food-meta">
+          <span class="type-badge type-${f.type.replace('-','_').replace('-','_')}">${f.type==='Instant-Snack'?'Instant':f.type}</span>
+          <span class="req-label">Req <span>${f.req}</span></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.food-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const name = unescape(card.dataset.name);
+      if (eaten.has(name)) eaten.delete(name);
+      else eaten.add(name);
+      saveState();
+      updateStats();
+      // Animate card
+      card.classList.toggle('eaten', eaten.has(name));
+      // If filtering by eaten/uneaten, re-render after a tick
+      if (browseEaten !== 'all') setTimeout(renderGrid, 120);
+    });
+  });
+}
+
+// ── MISSING ───────────────────────────────────────────────────────────────────
+function renderMissing() {
+  let missing = FOOD_LIST.filter(f => !eaten.has(f.name) && missTypeFilter.has(f.type));
+
+  if (missingSort === 'name') {
+    missing.sort((a,b) => a.name.localeCompare(b.name));
+  } else if (missingSort === 'level') {
+    missing.sort((a,b) => a.req - b.req || a.name.localeCompare(b.name));
+  } else if (missingSort === 'type') {
+    missing.sort((a,b) => a.type.localeCompare(b.type) || a.req - b.req);
+  }
+
+  const out = document.getElementById('missing-output');
+  if (missing.length === 0) {
+    out.innerHTML = '<em style="color:var(--green2)">All foods eaten! You are a true Gourmand. 🍽</em>';
+    return;
+  }
+  out.innerHTML = missing.map(f =>
+    `<div class="missing-food-line">
+      <span class="gnum">[${f.req}]</span>
+      <span class="fname">${f.name}</span>
+      <span class="ftype">— ${f.type}</span>
+    </div>`
+  ).join('');
+}
+
+function getMissingText() {
+  let missing = FOOD_LIST.filter(f => !eaten.has(f.name) && missTypeFilter.has(f.type));
+  if (missingSort === 'name') missing.sort((a,b) => a.name.localeCompare(b.name));
+  else if (missingSort === 'level') missing.sort((a,b) => a.req - b.req || a.name.localeCompare(b.name));
+  else missing.sort((a,b) => a.type.localeCompare(b.type) || a.req - b.req);
+  return missing.map(f => `[Req ${f.req}] ${f.name} (${f.type})`).join('\n');
+}
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+function importFoods() {
+  const text = document.getElementById('import-text').value;
+  if (!text.trim()) return;
+  const lines = text.split(/[\n,;]+/).map(l => l.trim()).filter(Boolean);
+  let matched = 0, unmatched = [];
+
+  lines.forEach(line => {
+    const lower = line.toLowerCase();
+    const food = FOOD_LIST.find(f => f.name.toLowerCase() === lower ||
+                                      f.name.toLowerCase().includes(lower) ||
+                                      lower.includes(f.name.toLowerCase()));
+    if (food) { eaten.add(food.name); matched++; }
+    else unmatched.push(line);
+  });
+
+  saveState();
+  updateStats();
+  renderGrid();
+  renderMissing();
+
+  const res = document.getElementById('import-result');
+  res.style.display = 'block';
+  if (unmatched.length === 0) {
+    res.className = 'import-result success';
+    res.innerHTML = `✓ Matched and marked <strong>${matched}</strong> food${matched!==1?'s':''} as eaten.`;
+  } else {
+    res.className = 'import-result warning';
+    res.innerHTML = `✓ Matched <strong>${matched}</strong> foods. Could not match ${unmatched.length}: <em>${unmatched.slice(0,5).join(', ')}${unmatched.length>5?'…':''}</em>`;
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'missing') renderMissing();
+  });
+});
+
+// ── BROWSE CONTROLS ───────────────────────────────────────────────────────────
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    browseFilter = btn.dataset.filter;
+    renderGrid();
+  });
+});
+document.querySelectorAll('[data-eaten]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-eaten]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    browseEaten = btn.dataset.eaten;
+    renderGrid();
+  });
+});
+document.getElementById('search').addEventListener('input', renderGrid);
+document.getElementById('maxReq').addEventListener('input', renderGrid);
+document.getElementById('btn-clear-all').addEventListener('click', () => {
+  if (!confirm('Clear all eaten foods? This cannot be undone.')) return;
+  eaten.clear();
+  saveState();
+  updateStats();
+  renderGrid();
+  renderMissing();
+});
+
+// ── SORT / FILTER MISSING ─────────────────────────────────────────────────────
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    missingSort = btn.dataset.sort;
+    renderMissing();
+  });
+});
+['Meal','Snack','Instant-Snack'].forEach(type => {
+  const key = type === 'Instant-Snack' ? 'instant' : type.toLowerCase();
+  const btn = document.getElementById(`miss-filter-${key}`);
+  btn.classList.add('active');
+  btn.addEventListener('click', () => {
+    if (missTypeFilter.has(type)) {
+      if (missTypeFilter.size === 1) return; // keep at least one
+      missTypeFilter.delete(type);
+      btn.classList.remove('active');
+    } else {
+      missTypeFilter.add(type);
+      btn.classList.add('active');
+    }
+    renderMissing();
+  });
+});
+
+// ── IMPORT BUTTON ─────────────────────────────────────────────────────────────
+document.getElementById('btn-import').addEventListener('click', importFoods);
+
+// ── COPY / DOWNLOAD ───────────────────────────────────────────────────────────
+document.getElementById('btn-copy').addEventListener('click', () => {
+  const text = getMissingText();
+  navigator.clipboard.writeText(text).then(() => {
+    const c = document.getElementById('copy-confirm');
+    c.style.display = 'inline';
+    setTimeout(() => c.style.display = 'none', 2000);
+  });
+});
+document.getElementById('btn-download').addEventListener('click', () => {
+  const text = getMissingText();
+  const blob = new Blob([text], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gourmand-missing.txt';
+  a.click();
+});
+
+// ── SAVE / LOAD DATA ──────────────────────────────────────────────────────────
+document.getElementById('btn-export-save').addEventListener('click', () => {
+  const data = JSON.stringify({eaten:[...eaten], version:1});
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gourmand-save.json';
+  a.click();
+});
+document.getElementById('btn-load-save').addEventListener('click', () => {
+  const raw = document.getElementById('import-save').value.trim();
+  const res = document.getElementById('save-result');
+  try {
+    const data = JSON.parse(raw);
+    if (!data.eaten) throw new Error('Invalid format');
+    eaten = new Set(data.eaten);
+    saveState();
+    updateStats();
+    renderGrid();
+    res.style.display = 'block';
+    res.className = 'import-result success';
+    res.innerHTML = `✓ Loaded ${eaten.size} eaten foods.`;
+  } catch(e) {
+    res.style.display = 'block';
+    res.className = 'import-result warning';
+    res.innerHTML = '✗ Could not parse save data. Make sure to paste valid JSON.';
+  }
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updateStats();
+renderGrid();
+</script>
+</body>
+</html>
